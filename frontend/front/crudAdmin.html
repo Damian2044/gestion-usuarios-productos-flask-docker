@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jacquarda+Bastarda+9&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body{
+        font-size: 16px;
+        font-family:"Nunito",Courier, monospace;
+        margin: 0;
+        padding: 0;
+
+    }
+
+
+    #loginAdmin {
+        min-height: 100vh;
+        display: grid;                
+        background-color: #f0f2f5; 
+        grid-template-rows: 8vh 8vh 8vh 1fr 8vh;
+        grid-template-areas:
+            "header"
+            "nav"
+            "crud"
+            "main"
+            "footer";
+        padding: 0;
+    }
+    /*Estilos para el header*/
+    header{
+        background-color: #2980b9;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        grid-area: header;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    #mensjeBienvenidaAdmin {
+        margin: 0;
+        font-family: "Nunito", sans-serif;
+        font-size: 4vh;
+    }
+    /*Estilos opciones usuarios y productos*/
+    nav#nav{
+
+        width: 100%;
+        height: 100%;
+        grid-area: nav;
+        display: grid;
+        grid-template-columns: auto auto;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .opciones {
+        margin: 0 2vw;
+        width: 12vw;  
+        height: 6vh;       
+        font-size: 3vh; 
+        background-color: #0d0f36;    
+        color: white;
+        font-weight: bold;
+        border-radius: 2vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+    .opciones:hover {
+        background-color: #0d0f3696;
+        color: #f0f2f5; 
+    }
+    .opciones.activo {
+        background-color: #2980b9;
+        color: #0d0f36;
+    }
+
+    /*Estilos para las opciones de CRUD*/
+    nav#crudOpcionesContenedor {
+        width: 100%;
+        height: 100%;
+        grid-area: crud;
+        display: grid;
+        grid-template-columns: auto auto auto;
+        justify-content: center;
+        align-items: center;
+    }
+    .crudOpciones{
+        margin: 0 2vw;
+        width: 12vw;  
+        height: 6vh;       
+        font-size: 3vh; 
+        background-color: #0d0f36;    
+        color: white;
+        font-weight: bold;
+        border-radius: 2vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+    }
+    .crudOpciones:hover {
+        background-color: #0d0f3696;
+        color: #f0f2f5; 
+    }
+    .crudOpciones.activo {
+        background-color: #2980b9;
+        color: #0d0f36;
+    }
+
+    /*Estilos para el contenedor de usuarios y productos*/
+    #usuariosContenedor, #productosContenedor {
+        grid-area: main;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;        
+    }
+    .titSecCrud {
+        font-size: 2rem;
+        color: #0d0f36;
+        text-align: center;
+    }
+    
+    #secAgregarUsuario, #secActualizarUsuario, #secEliminarUsuario,
+    #secAgregarProducto, #secActualizarProducto, #secEliminarProducto {
+        width: 100%;
+        max-width: 600px; 
+        padding: 20px;
+        background-color: white;
+        border-radius: 10px;
+    }
+
+    .grupoCampos{
+        display: grid;
+        grid-template-columns: 30% 70%; 
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+        width: 100%;
+
+    }
+    .grupoCampos label{
+        font-size: 1rem;
+        text-align: right;
+        color: black;
+        font-weight: bold;
+    }
+    input,select{
+        font-family: "Nunito",Courier, monospace;
+        font-size: 1rem;
+        padding: 10px 15px;
+        border: 2px solid #ced4da;
+        border-radius: 50px;
+    }
+
+    .botonContenedor {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    .botonContenedor button{
+        background-color: #0d0f36;    
+        color: white;
+        border: none; 
+        border-radius: 50px;
+        font-family: "Nunito", sans-serif;
+        font-size: 1.5rem;
+        cursor: pointer;
+        width: 300px;
+        height: 50px;
+    }
+
+    .botonContenedor button:hover {
+        background-color: #0d0f3696;
+        color: #f0f2f5; 
+    }
+
+    /*Estilos para la tabla de resumen*/
+    table{
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+
+    }
+
+    th{
+        font-size: 1rem;
+        font-weight: bold;
+        background-color: #0d0f36;
+        color: white;
+        border: 2px solid #0d0f3696;
+    }
+    td{
+        text-align: center;
+        border: 2px solid #0d0f3696;
+
+    }
+
+    .xEliminar{
+        background-color: #d9534f;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: block;
+        margin: 0 auto;
+        text-align: center;
+        line-height: 30px;
+       
+    }
+    .xEliminar:hover {
+        background-color: #fc0c04;
+    }
+
+
+    #MensajeCampos{
+        color: white;
+        background-color: #316e25;
+        margin: 5px auto;
+        text-align: center;
+        width: 500px;
+        font-size: 1.5rem;
+        font-family: "Nunito",Courier, monospace;
+    }
+
+    /*Estilos para el footer*/
+    footer {
+        width: 100%;
+        height: 80px;
+        margin-top: auto;
+    }
+
+    footer img#regresar {
+        width: 60px;
+        height: 60px;
+        cursor: pointer;
+    }
+
+
+    
+
+</style>
+<body>
+    <div id="loginAdmin">
+        <header>
+            <h2 id="mensjeBienvenidaAdmin">Panel de Administración</h2>
+        </header>
+        <nav id="nav">
+            <div id="opcionUsuarios" class="opciones activo" onclick="cambiarCrud('usuarios')">Usuarios</div>
+            <div id="opcionProductos" class="opciones" onclick="cambiarCrud('productos')">Productos</div>
+        </nav>
+        <nav id="crudOpcionesContenedor">
+            <div class="crudOpciones activo" id="btnAgregar" onclick="mostrarSeccion('agregar')">Añadir</div>
+            <div class="crudOpciones" id="btnActualizar" onclick="mostrarSeccion('actualizar')">Actualizar</div>
+            <div class="crudOpciones" id="btnEliminar" onclick="mostrarSeccion('eliminar')">Eliminar</div>
+
+        </nav>
+        <main>
+            <div id="usuariosContenedor" style="display: flex;">
+                <div id="secAgregarUsuario">
+                    <h3 class="titSecCrud">Añadir Usuario</h3>
+                    <form id="formularioAgregarUsuario">
+
+                    </form>
+
+                </div>
+                <div id="secActualizarUsuario" style="display:none;">
+                    <h3 class="titSecCrud">Actualizar Usuario</h3>
+                    <form id="formularioActualizarUsuario">
+
+                    </form>
+                </div>
+                <div id="secEliminarUsuario" style="display:none;">
+                    <h3 class="titSecCrud">Eliminar Usuario</h3>
+                    <div id="contenedorTablaUsuarios"></div>
+                    
+                </div>
+            </div>
+
+            <div id="productosContenedor">
+                <div id="secAgregarProducto">
+                    <h3 class="titSecCrud">Añadir Producto</h3>
+                    <form id="formularioAgregarProducto">
+                    </form>
+                </div>
+                <div id="secActualizarProducto" style="display:none;">
+                    <h3 class="titSecCrud">Actualizar Producto</h3>
+                    <form id="formularioActualizarProducto">
+                    </form>
+                </div>
+                <div id="secEliminarProducto" style="display:none;">
+                    <h3 class="titSecCrud">Eliminar Producto</h3>
+                    <div id="contenedorTablaProductos"></div>
+                </div>
+            </div>
+        <div id="MensajeCampos"></div></main>
+
+        <footer>
+            <img onclick="volver()" id="regresar"  src="{{ url_for('static', filename='regresar_main.png') }}" alt="Imagen de botón para regresar al login">
+        </footer>
+        
+
+    </div>
+
+    <script>
+        let seccionActual=null
+        validarSesion=()=>{
+            const datosSesion=sessionStorage.getItem("usuario");
+            const verificado=sessionStorage.getItem("verificado");
+            console.log("Datos de sesión usuario", datosSesion, "Verificado:", verificado);
+            if(!datosSesion || verificado!=="true"){
+                alert("No has iniciado sesión");
+                window.location.href="/";
+                sessionStorage.removeItem("usuario");
+                sessionStorage.removeItem("verificado");
+                return;
+            }
+            const usuario=JSON.parse(datosSesion);
+            //console.log(usuario);
+            if(usuario.tipoUsuario!=="administrador"){
+                alert("Acceso denegado");
+                window.location.href="/";
+                sessionStorage.removeItem("usuario");
+                sessionStorage.removeItem("verificado");
+                return;
+            }
+        }
+
+        //Manejo de sesión del usuario admin
+        /*window.onload=()=>{
+            usuario=JSON.parse(sessionStorage.getItem("usuario"));
+            validarSesion();
+            document.getElementById('loginAdmin').style.display='grid';
+            document.getElementById('mensjeBienvenidaAdmin').textContent=`Panel de administración de ${usuario.username}`;
+            seccionActual='usuarios';
+            cambiarCrud('usuarios'); //Cargar la sección de usuarios por defecto
+            
+        };*/
+        window.addEventListener("pageshow", function (event) {
+            limpiarCampos('formularioAgregarUsuario');
+            usuario=JSON.parse(sessionStorage.getItem("usuario"));
+            validarSesion();
+            document.getElementById('mensjeBienvenidaAdmin').textContent=`Panel de administración de ${usuario.username}`;
+            seccionActual='usuarios';
+            cambiarCrud('usuarios'); //Cargar la sección de usuarios por defecto
+        });
+        //Manejo de cerrar sesión
+        volver=()=>{
+            sessionStorage.removeItem("usuario");
+            sessionStorage.removeItem("verificado");
+            location.href="/";
+        }
+        //Funcion para indicar mensaje de error
+        indicarMensaje=(mensaje="",color="red",funcionExtra=null)=>{
+            console.log(mensaje);
+            let mensajeCampos=document.getElementById("MensajeCampos");
+            mensajeCampos.style.backgroundColor=color;
+            mensajeCampos.scrollIntoView({ behavior: "smooth", block: "center" });// Desplazar la vista al mensaje
+            mensajeCampos.textContent=mensaje;
+            setTimeout(() => {
+                mensajeCampos.textContent="";
+
+                if(funcionExtra){
+                    funcionExtra();
+                }
+            }, 600);
+
+        }
+        //Función para limpiar los campos del formulario
+        limpiarCampos=(formulario)=>{
+            document.getElementById(formulario).reset();
+        }
+        //Función para cambiar entre usuarios y productos
+        const cambiarCrud=(opcion)=>{
+            const usuariosContenedor=document.getElementById('usuariosContenedor');
+            const productosContenedor=document.getElementById('productosContenedor');
+            const opcionUsuarios=document.getElementById('opcionUsuarios');
+            const opcionProductos=document.getElementById('opcionProductos');
+            
+            if(opcion==='usuarios'){
+                seccionActual='usuarios';
+                usuariosContenedor.style.display='flex';
+                productosContenedor.style.display='none';
+                opcionUsuarios.classList.add('activo');
+                opcionProductos.classList.remove('activo');
+            }else if(opcion==='productos'){
+                seccionActual='productos';
+                productosContenedor.style.display='flex';
+                usuariosContenedor.style.display='none';
+                opcionProductos.classList.add('activo');
+                opcionUsuarios.classList.remove('activo');     
+            }
+            mostrarSeccion("agregar");
+            cargarFormulario("agregar");
+        }
+        //Función para mostrar la sección correspondiente de CRUD
+        mostrarSeccion=(seccion)=>{
+            if(!seccionActual) return;
+            //Actualizar el botón activo
+            let botonesCrud={btnAgregar: document.getElementById('btnAgregar'),
+                            btnActualizar: document.getElementById('btnActualizar'),
+                            btnEliminar: document.getElementById('btnEliminar')}; 
+            //Desactivar todos los botones de CRUD
+            for(let key in botonesCrud){
+                botonesCrud[key].classList.remove('activo');
+            }
+            //Activar el botón correspondiente
+            if(seccion==="agregar"){
+                botonesCrud.btnAgregar.classList.add('activo');
+            }else if(seccion==="actualizar"){
+                botonesCrud.btnActualizar.classList.add('activo');
+            }else if(seccion==="eliminar"){
+                botonesCrud.btnEliminar.classList.add('activo');
+            }
+
+            //Mostrar la sección correspondiente
+            let secciones={secAgregarUsuario: document.getElementById('secAgregarUsuario'),
+                           secActualizarUsuario: document.getElementById('secActualizarUsuario'),
+                           secEliminarUsuario: document.getElementById('secEliminarUsuario'),
+                           secAgregarProducto: document.getElementById('secAgregarProducto'),
+                           secActualizarProducto: document.getElementById('secActualizarProducto'),
+                           secEliminarProducto: document.getElementById('secEliminarProducto')};
+            //Ocultar todas las secciones
+            for(let key in secciones){
+                secciones[key].style.display='none';
+            }
+            
+            //Mostrar la sección correspondiente
+            if(seccionActual=="usuarios"){
+                if(seccion==="agregar"){
+                    secciones.secAgregarUsuario.style.display='block';
+                    cargarFormulario(seccion);
+                }else if(seccion==="actualizar"){
+                    secciones.secActualizarUsuario.style.display='block';
+                    cargarFormulario(seccion);
+                    cargarUsuarios();
+                }else if(seccion==="eliminar"){
+                    secciones.secEliminarUsuario.style.display='block';
+                    cargarTablaUsuarios();
+                }
+                
+            }else if(seccionActual=="productos"){
+                if(seccion==="agregar"){
+                    secciones.secAgregarProducto.style.display='block';
+                    cargarFormulario(seccion);
+                }else if(seccion==="actualizar"){
+                    secciones.secActualizarProducto.style.display='block';
+                    cargarFormulario(seccion);
+                    cargarProductos();
+                }else if(seccion==="eliminar"){
+                    secciones.secEliminarProducto.style.display='block';
+                    cargarTablaProductos();
+                }
+            }
+
+        }
+        //Carga de formularios de agregar, actualizar
+        cargarFormulario=(accion)=>{
+            const formularioAgregarUsuario=document.getElementById('formularioAgregarUsuario');
+            const formularioActualizarUsuario=document.getElementById('formularioActualizarUsuario');
+            formularioUsuarios=
+                        `<div class="grupoCampos">
+                            <label for="username">Nombre de Usuario:</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        <div class="grupoCampos">
+                            <label for="email">Correo Electrónico:</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="grupoCampos">
+                            <label for="password">Contraseña:</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        <div class="grupoCampos">
+                            <label for="tipoUsuario">Tipo de Usuario:</label>
+                            <select id="tipoUsuario" name="tipoUsuario" required>
+                                <option value="">Seleccione</option>
+                                <option value="administrador">Administrador</option>
+                                <option value="usuario">Usuario</option>
+                            </select>
+                        </div>`;
+            formularioProductos=
+                        `<div class="grupoCampos">
+                            <label for="nombreProducto">Nombre del Producto:</label>
+                            <input type="text" id="nombreProducto" name="nombreProducto" required>
+                        </div>
+                        <div class="grupoCampos">
+                            <label for="precioProducto">Precio del Producto:</label>
+                            <input type="number" id="precioProducto" name="precioProducto" required min="0" step="0.01">
+                        </div>`;
+
+
+            if(seccionActual==="usuarios"){
+                if(accion==="agregar"){
+                    formularioAgregarUsuario.innerHTML=formularioUsuarios+
+                        `<div class="botonContenedor">
+                            <button type="button" onclick="agregarUsuario()" id="btnAgregarUsuario">Añadir Usuario</button>
+                        </div>`;
+    
+                }else if(accion==="actualizar"){
+                    formularioActualizarUsuario.innerHTML=
+                        `<div class="grupoCampos">
+                            <label for="selectUsuarioActualizar">Seleccionar Usuario:</label>
+                            <select id="selectUsuarioActualizar" name="usuarioActualizar" onchange="cargarDatosUsuario()">
+                                <option value="">Seleccione Usuario</option>
+                            </select>
+                        </div>`+formularioUsuarios+
+                        `<div class="botonContenedor">
+                            <button type="button" onclick="actualizarUsuario()" id="btnActualizarUsuario">Actualizar Usuario</button>
+                        </div>`;
+                }
+            }else if(seccionActual==="productos"){
+                if(accion==="agregar"){
+                    formularioAgregarProducto.innerHTML=formularioProductos+
+                        `<div class="botonContenedor">
+                            <button type="button" onclick="agregarProducto()" id="btnAgregarProducto">Añadir Producto</button>
+                        </div>`;
+                }else if(accion==="actualizar"){
+                    formularioActualizarProducto.innerHTML=
+                        `<div class="grupoCampos">
+                            <label for="selectProductoActualizar">Seleccionar Producto:</label>
+                            <select id="selectProductoActualizar" name="productoActualizar" onchange="cargarDatosProducto()" required>
+                                <option value="">Seleccione Producto</option>
+                            </select>
+                        </div>`+formularioProductos+
+                        `<div class="botonContenedor">
+                            <button type="button" onclick="actualizarProducto()" id="btnActualizarProducto">Actualizar Producto</button>
+                        </div>`;
+                }
+            }
+        }
+
+
+        //Función para agregar un usuario
+        agregarUsuario=()=>{
+            const formularioAgregarUsuario=document.getElementById('formularioAgregarUsuario');
+            const username=formularioAgregarUsuario['username'].value;
+            const email=formularioAgregarUsuario['email'].value;
+            const password=formularioAgregarUsuario['password'].value;  
+            const tipoUsuario=formularioAgregarUsuario['tipoUsuario'].value;
+
+            if(!username || !email || !password || !tipoUsuario){
+                document.getElementById('btnAgregarUsuario').disabled=true;
+                indicarMensaje("Debe completar todos los campos","red",()=>{
+                    document.getElementById('btnAgregarUsuario').disabled=false;
+                    limpiarCampos('formularioAgregarUsuario');
+                });
+                return;
+            }
+
+            fetch("http://localhost:5000/users", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({username, email, password, tipoUsuario})
+            })
+
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    indicarMensaje("Error al agregar usuario","red");
+                    throw new Error("Error al agregar usuario");
+                }
+                return respuesta.json();
+            })
+            .then(datos=>{
+                console.log(datos);
+                indicarMensaje("Usuario agregado correctamente","green",()=>{
+                    limpiarCampos('formularioAgregarUsuario');
+                });
+            })
+            .catch(error => {
+                console.error("Error al agregar usuario:", error);
+                indicarMensaje("Error al agregar usuario","red",()=>{
+                    limpiarCampos('formularioAgregarUsuario');
+                });
+            });
+        }
+
+        listaUsuarios=()=>{
+            fetch("http://localhost:5000/users")
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al cargar usuarios");
+                }
+                return respuesta.json();
+            })
+            .then(usuarios=>{
+                return usuarios;
+            })
+            .catch(error => {
+                console.error("Error al cargar usuarios:", error);
+            });
+        }
+  
+        //Función para cargar los usuarios en el formulario de actualización
+        cargarUsuarios=()=>{
+            fetch("http://localhost:5000/users")
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al cargar usuarios");
+                }
+                return respuesta.json();
+            })
+            .then(usuarios=>{
+                const selectUsuarioActualizar=document.getElementById('selectUsuarioActualizar');
+                htmlUsuarios=`<option value="">Seleccione Usuario</option>`;
+                for(const usuario of usuarios){
+                    if(usuario.username === "admin") continue; // No permitir actualizar al usuario admin
+                    htmlUsuarios+=`<option value="${usuario.id}">${usuario.username}</option>`;
+                }
+                selectUsuarioActualizar.innerHTML=htmlUsuarios;
+            })
+            .catch(error => {
+                console.error("Error al cargar usuarios:", error);
+            });
+        }
+
+        //Función para cargar los datos del usuario seleccionado en el formulario de actualización
+        cargarDatosUsuario=()=>{
+            const idUsuario=document.getElementById('selectUsuarioActualizar').value;
+            if(!idUsuario){
+                limpiarCampos('formularioActualizarUsuario');
+                return;
+            };
+
+            fetch(`http://localhost:5000/users/${idUsuario}`)
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al cargar usuario");
+                }
+                return respuesta.json();
+            })
+            .then(usuario=>{
+                console.log(usuario);
+                const formularioActualizarUsuario=document.getElementById('formularioActualizarUsuario');
+                formularioActualizarUsuario['username'].value=usuario.username;
+                formularioActualizarUsuario['email'].value=usuario.email;
+                formularioActualizarUsuario['password'].value=usuario.password;     
+                formularioActualizarUsuario['tipoUsuario'].value=usuario.tipoUsuario;
+
+            })
+            .catch(error => {
+                console.error("Error al cargar datos del usuario:", error);
+                indicarMensaje("Error al cargar datos del usuario","red");
+            });
+        }
+        //Función para actualizar un usuario
+        actualizarUsuario=(id)=>{
+            const formularioActualizarUsuario=document.getElementById('formularioActualizarUsuario');
+            const idUsuario=formularioActualizarUsuario['selectUsuarioActualizar'].value;
+            const username=formularioActualizarUsuario['username'].value;
+            const email=formularioActualizarUsuario['email'].value;
+            const password=formularioActualizarUsuario['password'].value;
+            const tipoUsuario=formularioActualizarUsuario['tipoUsuario'].value;
+
+            if(!idUsuario || !username || !email || !password || !tipoUsuario){
+                document.getElementById('btnActualizarUsuario').disabled=true;
+                indicarMensaje("Debe completar todos los campos","red",()=>{
+                    document.getElementById('btnActualizarUsuario').disabled=false;
+                    limpiarCampos('formularioActualizarUsuario');
+                });
+                return;
+            }
+
+            fetch(`http://localhost:5000/users/${idUsuario}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({username, email, password, tipoUsuario})
+            })
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al actualizar usuario");
+                }
+                return respuesta.json();
+            })
+            .then(datos=>{
+                console.log(datos);
+                indicarMensaje("Usuario actualizado correctamente","green",()=>{
+                    limpiarCampos('formularioActualizarUsuario');
+                    cargarUsuarios();
+                });
+            })
+            .catch(error => {
+                console.error("Error al actualizar usuario:", error);
+                indicarMensaje("Error al actualizar usuario","red",()=>{
+                    limpiarCampos('formularioActualizarUsuario');
+                });
+            });
+        }
+
+
+
+        //Función para armar la tabla de eliminación de usuarios
+        cargarTablaUsuarios=()=>{
+            fetch("http://localhost:5000/users")
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al cargar usuarios");
+                }
+                return respuesta.json();
+            })
+            .then(usuarios=>{
+                const formularioEliminarUsuario=document.getElementById('contenedorTablaUsuarios');
+                if(usuarios.length===1) {
+                    formularioEliminarUsuario.innerHTML="<p>No hay usuarios para eliminar.</p>";
+                    return;
+                }
+                let tablaUsuarios=`<table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nombre de Usuario</th>
+                                            <th>Correo Electrónico</th>
+                                            <th>Tipo de Usuario</th>
+                                            <th>Eliminar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+                for(const usuario of usuarios){
+                    if(usuario.username==="admin") continue; // No permitir eliminar al usuario admin
+                    tablaUsuarios+=`<tr>
+                                        <td>${usuario.id}</td>
+                                        <td>${usuario.username}</td>
+                                        <td>${usuario.email}</td>
+                                        <td>${usuario.tipoUsuario}</td>
+                                        <td class="eliminarBoton">
+                                            <div class="xEliminar" onclick="eliminarUsuario(${usuario.id})">X</div>
+                                        </td>
+                                    </tr>`;
+                }
+                tablaUsuarios+=`</tbody>
+                                </table>
+                                `;
+                formularioEliminarUsuario.innerHTML=tablaUsuarios;
+            })
+            .catch(error => {
+                console.error("Error al cargar usuarios:", error);
+                indicarMensaje("Error al cargar usuarios","red");
+            });
+        }
+        //Función para eliminar un usuario
+        eliminarUsuario=(id)=>{
+            fetch(`http://localhost:5000/users/${id}`, {
+                method: "DELETE"
+            })
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al eliminar usuario");
+                }
+                return respuesta.json();
+            })
+            .then(datos=>{
+                console.log(datos);
+                indicarMensaje("Usuario eliminado correctamente","green",()=>{
+                    cargarTablaUsuarios();
+                });
+      
+            })
+            .catch(error => {
+                console.error("Error al eliminar usuario:", error);
+                indicarMensaje("Error al eliminar usuario","red");
+            });
+        }
+
+
+        //Función para agregar un producto
+        agregarProducto=()=>{
+            const formularioAgregarProducto=document.getElementById('formularioAgregarProducto');
+            const nombre=formularioAgregarProducto['nombreProducto'].value;
+            const precio=formularioAgregarProducto['precioProducto'].value; 
+            if(!nombre || !precio){
+                document.getElementById('btnAgregarProducto').disabled=true;
+                indicarMensaje("Debe completar todos los campos","red",()=>{
+                    document.getElementById('btnAgregarProducto').disabled=false;
+                    limpiarCampos('formularioAgregarProducto');
+                });
+                return;
+            }
+            fetch("http://localhost:5001/productos", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({nombre, precio})
+            })
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al agregar producto");
+                }
+                return respuesta.json();
+            })
+            .then(datos=>{
+                console.log(datos);
+                indicarMensaje("Producto agregado correctamente","green",()=>{
+                    limpiarCampos('formularioAgregarProducto');
+                });
+            })
+            .catch(error => {
+                console.error("Error al agregar producto:", error);
+                indicarMensaje("Error al agregar producto","red",()=>{
+                    limpiarCampos('formularioAgregarProducto');
+                });
+            });
+        }
+        //Función para cargar los productos en el formulario de actualización
+        cargarProductos=()=>{
+            fetch("http://localhost:5001/productos")
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al cargar productos");
+                }
+                return respuesta.json();
+            })
+            .then(productos=>{
+                const selectProductoActualizar=document.getElementById('selectProductoActualizar');
+                htmlProductos=`<option value="">Seleccione Producto</option>`;
+                for(const producto of productos){
+                    htmlProductos+=`<option value="${producto.id}">${producto.nombre}</option>`;
+                }
+                selectProductoActualizar.innerHTML=htmlProductos;
+            })
+            .catch(error => {
+                console.error("Error al cargar productos:", error);
+            });
+        }
+
+        //Función para cargar los datos del producto seleccionado en el formulario de actualización
+        cargarDatosProducto=()=>{
+            const idProducto=document.getElementById('selectProductoActualizar').value;
+            if(!idProducto){
+                limpiarCampos('formularioActualizarProducto');
+                return;
+            };
+
+            fetch(`http://localhost:5001/productos/${idProducto}`)
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al cargar producto");
+                }
+                return respuesta.json();
+            })
+            .then(producto=>{
+                console.log(producto);
+                const formularioActualizarProducto=document.getElementById('formularioActualizarProducto');
+                formularioActualizarProducto['nombreProducto'].value=producto.nombre;
+                formularioActualizarProducto['precioProducto'].value=producto.precio;
+            })
+            .catch(error => {
+                console.error("Error al cargar datos del producto:", error);
+                indicarMensaje("Error al cargar datos del producto","red");
+            });
+        }
+
+        //Función para actualizar un producto
+        actualizarProducto=()=>{
+            const formularioActualizarProducto=document.getElementById('formularioActualizarProducto');
+            const idProducto=formularioActualizarProducto['selectProductoActualizar'].value;
+            const nombre=formularioActualizarProducto['nombreProducto'].value;
+            const precio=formularioActualizarProducto['precioProducto'].value;
+            if(!idProducto || !nombre || !precio){
+                document.getElementById('btnActualizarProducto').disabled=true;
+                indicarMensaje("Debe completar todos los campos","red",()=>{
+                    document.getElementById('btnActualizarProducto').disabled=false;
+                    limpiarCampos('formularioActualizarProducto');
+                });
+                return;
+            }
+            fetch(`http://localhost:5001/productos/${idProducto}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({nombre, precio})
+            })
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al actualizar producto");
+                }
+                return respuesta.json();
+            })
+            .then(datos=>{
+                console.log(datos);
+                indicarMensaje("Producto actualizado correctamente","green",()=>{
+                    limpiarCampos('formularioActualizarProducto');
+                    cargarProductos();
+                });
+            })
+            .catch(error => {
+                console.error("Error al actualizar producto:", error);
+                indicarMensaje("Error al actualizar producto","red",()=>{
+                    limpiarCampos('formularioActualizarProducto');
+                });
+            });
+        }
+        //Función para armar la tabla de eliminación de productos
+        cargarTablaProductos=()=>{
+            fetch("http://localhost:5001/productos")
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al cargar productos");
+                }
+                return respuesta.json();
+            })
+            .then(productos=>{
+                const formularioEliminarProducto=document.getElementById('contenedorTablaProductos');
+                if(productos.length===0) {
+                    formularioEliminarProducto.innerHTML="<p>No hay productos para eliminar.</p>";
+                    return;
+                }
+                let tablaProductos=`<table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nombre del Producto</th>
+                                            <th>Precio</th>
+                                            <th>Eliminar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+                for(const producto of productos){
+                    tablaProductos+=`<tr>
+                                        <td>${producto.id}</td>
+                                        <td>${producto.nombre}</td>
+                                        <td>${producto.precio}</td>
+                                        <td class="eliminarBoton">
+                                            <div class="xEliminar" onclick="eliminarProducto(${producto.id})">X</div>
+                                        </td> 
+                                    </tr>`;
+                }
+                tablaProductos+=`</tbody>
+                                </table>`;
+                formularioEliminarProducto.innerHTML=tablaProductos;
+            })
+            .catch(error => {
+                console.error("Error al cargar productos:", error);
+                indicarMensaje("Error al cargar productos","red");
+            });
+        }
+        //Función para eliminar un producto
+        eliminarProducto=(id)=>{
+            fetch(`http://localhost:5001/productos/${id}`, {
+                method: "DELETE"
+            })
+            .then(respuesta=>{
+                if(!respuesta.ok){
+                    throw new Error("Error al eliminar producto");
+                }
+                return respuesta.json();
+            })
+            .then(datos=>{
+                console.log(datos);
+                indicarMensaje("Producto eliminado correctamente","green",()=>{
+                    cargarTablaProductos();
+                });
+      
+            })
+            .catch(error => {
+                console.error("Error al eliminar producto:", error);
+                indicarMensaje("Error al eliminar producto","red");
+            });
+        }
+   
+    </script>
+    
+</body>
+</html>

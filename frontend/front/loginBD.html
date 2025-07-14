@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jacquarda+Bastarda+9&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+    body{
+        font-size: 16px;
+        font-family:"Nunito",Courier, monospace;
+        min-height: 100vh;
+        margin: 0;
+        display: flex;                
+        align-items: center;       
+        justify-content: center;     
+        background-color: #f0f2f5; 
+    }
+    #login {
+        background-color: white;
+        padding: 30px 40px;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        width: 500px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+    }
+    #login h1{
+        text-align: center;
+        margin-bottom: 25px;
+        color: #333;
+        
+    }
+    .grupoCampos{
+        display: grid;
+        grid-template-areas: "label"
+                            "input";
+        grid-template-rows: 1fr 1fr;
+        margin-bottom: 10px;
+        padding: 10px;
+    }
+    .grupoCampos label{
+        font-size: 1.5rem;
+        grid-area: label;
+        text-align: left;
+        color: black;
+    }
+    input{
+        font-family: "Nunito",Courier, monospace;
+        font-size: 1rem;
+        padding: 10px;
+        border: 3px solid #ced4da;
+        border-radius: 50px;
+        grid-area: input;
+    }
+    input[type="text"],input[type="password"],input[type="email"]{
+        min-width: 400px;
+
+    }
+
+    #botonContenedor {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+
+    }
+
+    button{
+        background-color: #294380; 
+        color: white; 
+        border: none; 
+        border-radius: 50px;
+        font-family: "Nunito", sans-serif;
+        font-size: 1.5rem;
+        cursor: pointer;
+        width: 300px;
+        height: 50px;
+
+
+
+    }
+
+    button:hover {
+        background-color: #0d0f36;
+    }
+    #MensajeCampos{
+        color: white;
+        background-color: #316e25;
+        margin: 5px auto;
+        text-align: center;
+        width: 500px;
+        font-size: 1.5rem;
+        font-family: "Nunito",Courier, monospace;
+    }
+</style>
+<body>
+    <div id="login" >
+        <head>
+            <h1>Login</h1>
+        </head>
+        <main>
+            <form id="formularioLogin">
+                <div class="grupoCampos">
+                    <label for="username">Usuario:</label>
+                    <input type="text" id="username" name="username" placeholder="Username" required/>
+                </div>
+                <div class="grupoCampos">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" name="password" placeholder="Password" required/>
+                </div>
+                <div id="botonContenedor">
+                    <button type="button" onclick="validarInicioSesion()" id="botonInicio">Iniciar Sesión</button>
+                </div>
+                <div id="MensajeCampos">
+
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        /*window.onload=()=>{
+            console.log(sessionStorage.getItem("usuario"))
+            
+        }*/
+        window.addEventListener('pageshow', (event)=>{//evento se dispara cuando se carga la página o se regresa a ella
+            sessionStorage.clear(); //Limpia toda la sessionStorage
+            console.log(sessionStorage.getItem("usuario")) // Verifica que esté vacío
+            limpiarCampos();
+        });
+
+
+        limpiarCampos=()=>{
+            formulario=document.getElementById("formularioLogin").reset();
+            indicarMensaje()
+        }
+        indicarMensaje=(mensaje="",color="red")=>{
+            let mensajeCampos=document.getElementById("MensajeCampos");
+            mensajeCampos.style.backgroundColor=color;
+            mensajeCampos.textContent=mensaje
+        }
+        //Login
+        function validarInicioSesion(){
+            formulario=document.getElementById("formularioLogin")
+            console.log(formulario)
+            let username=formulario.username.value;
+            let password=formulario.password.value;
+            
+            if( username=="" || password==""){
+                indicarMensaje("Debe completar todos los campos","red")
+                formulario.botonInicio.disabled=true;
+                setTimeout(()=>{
+                    formulario.botonInicio.disabled=false;
+                    indicarMensaje("")
+                },600)
+                return
+            }
+            formulario.botonInicio.disabled=true;
+            fetch('http://localhost:5002/apiLogin', { method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            }).then(response => response.json())
+            .then(datos => {
+                formulario.botonInicio.disabled=false;
+                console.log(datos)
+                if(datos.estado){
+                    sessionStorage.setItem("usuario",JSON.stringify(datos.usuario));//Guardar usuario en sessionStorage (stringify para convertir a string un objeto)
+                    indicarMensaje(datos.mensaje,"#316e25")
+                    setTimeout(()=>{
+                        limpiarCampos()
+                    },600)
+                    
+                    setTimeout(()=>{
+                        /*if(datos.usuario.tipoUsuario=="administrador"){
+                            window.location.href="/admin";
+                            return
+                        }else if(datos.usuario.tipoUsuario=="usuario"){
+                            window.location.href="/user";
+                        }*/
+                       window.location.href="/verificacion";
+                    },600)
+
+                }else{
+                    indicarMensaje(datos.mensaje,"red")
+                    setTimeout(()=>{limpiarCampos()},600)
+                }
+
+            })
+            .catch(error => {
+                indicarMensaje("Error al consultar...!","red")
+                setTimeout(()=>{limpiarCampos()},600)
+                
+            });
+        }
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html> 
+<html lang="es"> 
+    <head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Validación</title> 
+    <style> 
+        @import url('https://fonts.googleapis.com/css2?family=Jacquarda+Bastarda+9&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap'); 
+        *{ 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        body{ 
+            font-size: 16px; 
+            font-family:"Nunito",Courier, monospace; 
+            min-height: 100vh; 
+            margin: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        } 
+        #autenticacionContenedor{ 
+            width: 100vw; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            font-family: "Nunito", sans-serif; 
+        }
+        #autenticacionContenedor header{ 
+            background-color: #2980b9; 
+            color: white; 
+            height: 10vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        h1{ font-size: 5vh; } 
+        main{
+            width: 100vw;
+            min-height: 90vh;
+            background-color: #8dd3dc;
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10vh;
+        }
+
+        #contenedorClave,#contenedorValidar{
+            background: white;
+            border-radius: 2%;
+
+        }
+
+        #contenedorClave{
+            width: 60vh;
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 1vw;
+        }
+        .tituloContenido{
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #2980b9;
+            padding: 1vh;
+            font-size:1.4vw;
+        }
+        .instrucciones{
+            font-size:1.3vw;
+            padding-left:3em;
+            color:#444;
+            text-align:left;
+            margin: 2vh 0;
+        }
+        .contenedorQR{
+            width: 15vw;
+            height: 15vh;
+            margin: 0 auto;
+            position: relative;/* padre relativo */
+            
+        }
+        #codigoQR img{
+            width: 100%;
+            height: 100%;
+        }
+
+
+        #recargar{
+            left: -5vw;
+            top: 10vh;
+            width: 30%;
+            height: 30%;
+            margin: 0 auto;
+            position: absolute;  /* posición absoluta dentro del contenedor */
+        }
+        #recargar:hover {
+            animation: girar 1s linear none;
+            background-color: yellow;
+            border-radius: 100%;
+            cursor: pointer;
+        }
+
+        @keyframes girar {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(180deg);
+        }
+        }
+        #textoClaveSecreta{
+            margin-top: 5em;
+            width: 100%;
+            text-align: center;
+            padding-left: -10vh;
+            font-size: 1.2vw;
+        }
+
+        #contenedorValidar{
+            width: 70vh;
+            height: 30vh;
+            display: flex;
+            flex-direction: column;
+
+            padding: 1vw;
+        }
+        .grupoCampos{
+            display: grid;
+            grid-template-columns: 0.5fr 2fr;
+            align-items: center;    
+            gap: 1vw; 
+        }
+        .grupoCampos div{
+            font-size: 2vw;
+            text-align: right;
+        }
+
+        input{
+            width: 100%;
+            height: 7vh;
+            border-radius: 50vw;
+            border: 0.3vw solid #ced4da;
+            padding: 0.5vw;
+            font-size: 1.5vw;
+            font-family: "Nunito",Courier, monospace;
+
+        }
+        #botonValidarContenedor{
+            display: flex;
+            justify-content: center;
+            margin-top: 2vh;
+        }
+        #botonValidar{
+            font-family: "Nunito",Courier, monospace;
+            width: 12vw;
+            height: 5vh;
+            border-radius: 50vw;
+            border: none;       
+            background-color: #2980b9;
+            color: white;
+            font-size: 2vw;
+            cursor: pointer;
+        }
+        #botonValidar:hover{
+            background-color: #1a5276;
+        }
+        #resultadoValidacion{
+            margin: 2vh auto;
+            font-size: 1.5vw;
+            text-align: center;
+            color: white;
+            background-color: #316e25;
+            font-family: "Nunito",Courier, monospace;
+            width: 30vw;
+
+        }
+
+
+
+    </style> 
+    </head>
+    <body> 
+        <div id="autenticacionContenedor"> 
+            <header> 
+                <h1>Autenticación con Google Authenticator</h1> 
+            </header> 
+            <main>
+                <div id="contenedorClave">
+                    <div class="tituloContenido">
+                        <h2>Registro en Google Authenticator</h2>
+                    </div>
+                    <div class="instrucciones">
+                        <ul>
+                            <li>Abrir Google Authenticator</li>
+                            <li>Agrega la cuenta nueva usando el QR o la clave secreta.</li>
+                            <li>La app generará un código temporal de 6 dígitos.</li>
+                        </ul>
+                    </div>
+                    <div class="contenedorQR">
+                        <div id="codigoQR"></div>
+                        <div style="width: 3vw; height: 3vh;">
+                            <img id="recargar" src="{{ url_for('static', filename='recargar.svg') }}" alt="Generar nuevo código QR" title="Generar nuevo código QR" 
+                            onclick="generarNuevoCodigo()"/>
+                        </div>
+                    </div>
+                    <div id="textoClaveSecreta">
+                    </div>
+
+                </div>
+                <div id="contenedorValidar">
+                    <div class="tituloContenido">
+                        <h2>Validación del código</h2>
+                    </div>
+                    <form id="formularioValidacion">
+                        <div class="grupoCampos">
+                            <div><label for="codigo">Código:</label></div>
+                            <div><input type="text" id="codigo" name="codigo" placeholder="Ingresa el código de 6 dígitos" required></div>
+                        </div>
+                        <div id="botonValidarContenedor">
+                            <button type="button" id="botonValidar" onclick="validarCodigo()">Validar</button>
+                        </div>
+                    </form>
+                    <div id="resultadoValidacion"></div>
+                </div>
+
+            </main> 
+        </div> 
+                    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> <script> 
+            //Función para validar la sesión del usuario
+            varlidarSesion=()=>{
+                const usuario=sessionStorage.getItem("usuario");
+                const verificado=sessionStorage.getItem("verificado");
+                console.log("Verificando sesión...", usuario);
+                if(!usuario){ 
+                    alert("No has iniciado sesión");
+                    window.location.href="/login";
+                    sessionStorage.removeItem("verificado");
+                    sessionStorage.removeItem("usuario");
+                    return;
+                }else{
+                    if(verificado){
+                       alert("Error estás regresando, debes iniciar sesión nuevamente");
+                       sessionStorage.clear();
+                       window.location.href="/";
+                       return; 
+                    }
+                }
+            }
+
+            //Función para obtener el código QR
+            async function peticionCrearClaveSecreta(){
+                try{
+                    respuesta=await fetch("http://localhost:5004/obtenerSecreto", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(JSON.parse(sessionStorage.getItem("usuario")))
+                    });
+                    if(!respuesta.ok){
+                        throw new Error("Error al obtener la clave secreta");
+                    }
+                    let datosRespuesta=await respuesta.json();
+                    console.log("Respuesta del servidor:", datosRespuesta);
+                    return datosRespuesta;
+
+                }catch(error){
+                    console.error("Error al obtener la clave secreta:", error);
+                    indicarMensaje("Error al obtener la clave secreta. Inténtalo de nuevo.", "red");
+                }
+            }
+
+            //Función para actualizar el código QR
+            async function peticionActualizarCodigoQR(){
+                try{
+                    respuesta=await fetch("http://localhost:5004/actualizarSecreto", {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(JSON.parse(sessionStorage.getItem("usuario")))
+                    });
+                    if(!respuesta.ok){
+                        throw new Error("Error al actualizar el código QR");
+                    }
+                    let datosRespuesta=await respuesta.json();
+                    console.log("Respuesta del servidor:", datosRespuesta);
+                    return datosRespuesta;
+
+                }catch(error){
+                    console.error("Error al actualizar el código QR:", error);
+                    indicarMensaje("Error al actualizar el código QR. Inténtalo de nuevo.", "red");
+                }
+            }
+
+
+            //Función para cargar el código QR
+            async function cargarCodigoQR(nuevo=true){
+                let respuestaSecreto=null
+                if(!nuevo){
+                    respuestaSecreto=await peticionActualizarCodigoQR();
+                }else{
+                    respuestaSecreto=await peticionCrearClaveSecreta();
+                }
+                
+                console.log("Respuesta del servidor:", respuestaSecreto);
+                let codigoQR=document.getElementById("codigoQR");
+                codigoQR.innerHTML=""; // Limpiar el contenido previo
+                let qrcode=new QRCode(codigoQR, {
+                    text: respuestaSecreto.uri,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                document.getElementById("textoClaveSecreta").innerHTML=`<p><strong>Clave secreta:</strong> ${respuestaSecreto.claveSecreta}</p>`;
+            }
+
+            //Función para controlar el acceso a la página
+            window.addEventListener("pageshow", function (event) {
+                limpiarCampos();
+                varlidarSesion();
+                cargarCodigoQR();               
+            });
+
+
+
+            //Funcion para indicar mensaje de error
+            indicarMensaje=(mensaje="",color="red",funcionExtra=null)=>{
+                console.log(mensaje);
+                let mensajeCampos=document.getElementById("resultadoValidacion");
+                mensajeCampos.style.backgroundColor=color;
+                mensajeCampos.scrollIntoView({ behavior: "smooth", block: "center" });// Desplazar la vista al mensaje
+                mensajeCampos.textContent=mensaje;
+                setTimeout(() => {
+                    mensajeCampos.textContent="";
+
+                    if(funcionExtra){
+                        funcionExtra();
+                    }
+                }, 600);
+
+            }
+            limpiarCampos=()=>{
+                document.getElementById("formularioValidacion").reset();
+                document.getElementById("resultadoValidacion").textContent="";
+            }
+
+            async function peticionRevisarCodigo(codigo){
+                try{
+                    respuesta=await fetch("http://localhost:5004/verificarCodigo", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            codigo: codigo,
+                            usuario: JSON.parse(sessionStorage.getItem("usuario"))
+                        })
+                    });
+                    if(!respuesta.ok && respuesta.status!=401){
+                        throw new Error("Error en el servidor al verificar el código");
+                    }
+                    let datos=await respuesta.json();
+                    console.log("Respuesta del servidor:", datos);
+                    return datos;
+                   
+
+                }catch(error){
+                    console.error("Error al revisar el código:", error);
+                    indicarMensaje("Error al validar el código. Inténtalo de nuevo.", "red");
+                }
+            }
+
+            //Función para validar el código ingresado
+            validarCodigo=async()=>{
+                let codigoIngresado=document.getElementById("codigo").value;
+                if(!codigoIngresado){
+                    document.getElementById("botonValidar").disabled=true;
+                    indicarMensaje("Por favor, ingresa un código de 6 dígitos.", "red",()=>{
+                        document.getElementById("botonValidar").disabled=false;
+                    });
+                    return;
+                }
+                let codigoValido=await peticionRevisarCodigo(codigoIngresado);
+                if(codigoValido.estado){
+                    indicarMensaje(codigoValido.mensaje, "green",()=>{
+
+                        sessionStorage.setItem("verificado", "true");
+                        usuario=JSON.parse(sessionStorage.getItem("usuario"));
+                        limpiarCampos();
+                        if(usuario.tipoUsuario=="administrador"){
+                            window.location.href="/admin";
+                        }else if(usuario.tipoUsuario=="usuario"){
+                            window.location.href="/user";
+                        }
+                        
+                    });
+
+                }else{
+                    document.getElementById("botonValidar").disabled=true;
+                    indicarMensaje(codigoValido.mensaje, "red",()=>{
+                        document.getElementById("botonValidar").disabled=false;
+                        limpiarCampos();
+                    });
+                }
+
+
+            }
+
+            generarNuevoCodigo=()=>{
+                cargarCodigoQR(false);
+            }
+
+
+        </script> 
+    </body> 
+</html>

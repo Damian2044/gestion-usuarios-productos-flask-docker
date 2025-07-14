@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Usuario</title>
+</head>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Jacquarda+Bastarda+9&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+    body{
+        font-size: 16px;
+        font-family:"Nunito",Courier, monospace;
+        min-height: 100vh;
+        margin: 0;
+        display: flex;                
+        align-items: center;       
+        justify-content: center;     
+        background-color: #f0f2f5; 
+    }
+    #loginCorrecto {
+        background-color: #f4f6f9;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        font-family: "Nunito", sans-serif;
+    }
+
+    #loginCorrecto header {
+        background-color: #2980b9;
+        color: white;
+        height: 10vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #mensajeBienvenida {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    #tituloLista {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        padding: 10px 30px;
+        font-weight: bold;
+   
+    }
+
+    #listaProductos {
+        padding: 10px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        align-items: center;
+
+    }
+
+    /* Tarjeta de producto */
+    .producto {
+        background-color: "#f9f9f9";
+        border-radius: 12px;
+        border: 4px solid #ccc;   
+        width: 200px;
+        min-height: 100px;
+        padding: 20px;
+        display: flex;  
+        flex-direction: column;   
+        align-items: center; 
+        justify-content: center;
+        transition: transform 0.3s ease;
+    }
+                       
+    .producto:hover {
+        transform: translateY(-5px);
+    }
+
+    .producto h3 {
+        font-size: 1.3rem;
+        color: black;
+        margin: 10px 0;
+    }
+
+    .producto p {
+        font-size: 1rem;
+        color: #7f8c8d;
+        margin: 0;
+    }
+
+    footer {
+        width: 100%;
+        height: 80px;
+        margin-top: auto;
+    }
+
+    footer img#regresar {
+        width: 60px;
+        height: 60px;
+        cursor: pointer;
+    }
+
+
+
+
+</style>
+<body>
+
+    <div id="loginCorrecto">
+        <header>
+            <h2 id="mensajeBienvenida">Bienvenido</h2>
+        </header>
+        <div id="tituloLista">Lista de Productos:</div>
+        <main id="listaProductos">
+        
+        </main>
+        <footer>
+            <img onclick="volver()" id="regresar"  src="{{ url_for('static', filename='regresar_main.png') }}" alt="Imagen de botón para regresar al login">
+        </footer>
+        
+    </div>
+
+
+    <script>
+        let intervaloProductos=null;
+        validarSesion=()=>{
+            const datosSesion=sessionStorage.getItem("usuario");
+            const verificado=sessionStorage.getItem("verificado");
+            console.log("Datos de sesión usuario", datosSesion, "Verificado:", verificado);
+            if(!datosSesion || verificado!=="true"){
+                alert("No has iniciado sesión");
+                window.location.href="/";
+                sessionStorage.removeItem("usuario");
+                sessionStorage.removeItem("verificado");
+                return;
+            }
+            const usuario=JSON.parse(datosSesion);
+            //console.log(usuario);
+            if(usuario.tipoUsuario!=="usuario"){
+                alert("Acceso denegado");
+                window.location.href="/";
+                sessionStorage.removeItem("usuario");
+                sessionStorage.removeItem("verificado");
+                return;
+            }
+        }
+
+        window.addEventListener("pageshow", function (event) {
+            validarSesion();
+            cargarProductos();
+            intervaloProductos=setInterval(cargarProductos,5000);               
+        });
+
+
+        volver=()=>{
+            clearInterval(intervaloProductos);
+            intervaloProductos=null;
+            sessionStorage.removeItem("usuario");
+            sessionStorage.removeItem("verificado");
+            location.href="/";
+        }
+
+        //Listar Productos
+        function cargarProductos() {
+            fetch("http://localhost:5001/productos")
+                .then(response => response.json())
+                .then(productos => {
+                    const contenedor=document.getElementById("listaProductos");
+                    contenedor.innerHTML=""; // limpiar antes de cargar
+                    console.log(productos)
+                    productos.forEach(prod => {
+                        const tarjeta=document.createElement("div");
+                        tarjeta.classList.add("producto")
+                        tarjeta.innerHTML = `
+                            <h3>${prod.nombre}</h3>
+                            <p>Precio: $${prod.precio}</p>
+                        `;
+                        contenedor.appendChild(tarjeta);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error al cargar los productos:", error);
+                });
+        }
+
+
+    </script>
+    
+</body>
+</html>

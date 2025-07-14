@@ -1,0 +1,67 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  db_productos:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase_productos
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_productos:/var/lib/postgresql/data
+
+  web:
+    build: ./usuarios
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://myuser:mypassword@db:5432/mydatabase
+    depends_on:
+      - db
+  web2:
+    build: ./productos
+    ports:
+      - "5001:5000" 
+    environment:
+      #Se usa el puerto 5432 porque es el puerto interno por defecto de PostgreSQL 
+      #accesible entre contenedores en la misma red de Docker
+      DATABASE_URL_PRODUCTOS: postgresql://myuser:mypassword@db_productos:5432/mydatabase_productos
+    depends_on:
+      - db_productos
+  
+  autenticacionusuarios:
+    build: ./autenticacion
+    ports:
+      - "5002:5000"
+    environment:
+      DATABASE_USUARIOS: postgresql://myuser:mypassword@db:5432/mydatabase
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5003:5000"
+    
+  verificacion2factor:
+    build: ./googleAuth
+    ports:
+      - "5004:5000"
+    environment:
+      DATABASE_URL: postgresql://myuser:mypassword@db:5432/mydatabase
+      
+volumes:
+  postgres_data: {} 
+  postgres_data_productos: {}
